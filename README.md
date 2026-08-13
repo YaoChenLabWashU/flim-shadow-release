@@ -1,63 +1,97 @@
 # FLIM shadow fitter
 
-**Nothing of yours is modified. Not one lab file is touched, edited, or moved.
-`rmpath` is a complete uninstall — there is nothing to undo, no backup to
-restore, no setting to change back.**
-
-It works by MATLAB path shadowing: two files here have the same names as two lab
-fit functions, so when this folder is first on the path, MATLAB calls these
-instead. Take the folder off the path and the lab code runs again, unchanged.
-
-## What it does
-
 Replaces the lab's double-exponential fit with a Poisson maximum-likelihood /
 variable-projection fit that constrains the amplitudes to be non-negative. The
 lab's Gauss-Newton least-squares fit can return negative amplitudes, which is
 where unphysical population fractions come from; this one cannot.
 
-## Install
+**Nothing of yours is modified.** Not one lab file is touched, edited, or moved.
+It works by MATLAB path shadowing: two files here have the same names as two lab
+fit functions, so when this folder is first on the path, MATLAB calls these
+instead. `rmpath` is a complete uninstall — nothing to restore, nothing to undo.
+
+Base MATLAB only. No toolboxes.
+
+---
+
+## 1. Download
+
+Go to the **Releases** page of this repository and click **Source code (zip)**
+under the latest release. Unzip it anywhere you like — your Desktop is fine.
+
+You will end up with a folder called **`flim-shadow-release-1.0`**.
+
+## 2. Install
+
+In MATLAB, change into that folder and add it to the path:
 
 ```matlab
-addpath('/path/to/flim-shadow-release', '-begin')
+cd /path/to/flim-shadow-release-1.0     % or drag the folder into the Terminal,
+                                        % or copy it from Finder's Get Info
+addpath(pwd, '-begin')
 ```
 
-`-begin` is required — it is what puts this folder ahead of the lab tree.
+Using `cd` first and then `pwd` saves you typing the path correctly.
 
-## Uninstall
+**`-begin` is required, not optional.** It is what puts this folder ahead of the
+lab tree. Without it MATLAB keeps calling the lab's copies and nothing changes.
+
+## 3. Verify
+
+Run both checks:
 
 ```matlab
-rmpath('/path/to/flim-shadow-release')
+which spc_fitexp2gaussGY -all
+which spc_fitexp2prfGY   -all
 ```
 
-That is the entire uninstall.
+A **correct** result is two lines — this folder first, the lab's copy second,
+marked `% Shadowed`:
 
-## Verify it is active — both checks, every session
+```
+/Users/you/Desktop/flim-shadow-release-1.0/spc_fitexp2gaussGY.m
+/Users/you/lab/zFLIM/fit/spc_fitexp2gaussGY.m                     % Shadowed
+```
+
+If you see only **one** line, the lab's zFLIM tree is not on your path yet —
+you haven't started the FLIM GUI. Start it, then check again. You need to see
+both lines, in that order.
+
+Use `-all`. Plain `which` shows only the first hit and looks correct even when
+it isn't.
+
+## 4. Run
+
+Start the FLIM GUI however you normally do, open a file, and hit
+**Fit with double**. Then read the console:
+
+- A line beginning **`>>> SHADOW`** means this fitter ran:
+
+  ```
+  >>> SHADOW spc_fitexp2prfGY | Poisson-MLE/VARPRO | chan=1 | irf=session | pop1=0.6651 redchisq=10.6573 | src=/Users/you/Desktop/flim-shadow-release-1.0/spc_fitexp2prfGY.m <<<
+  ```
+
+- **No marker**, or a line reading **`fraction of photons from SHG:`**, means the
+  **lab's** fitter ran, not this one. Go back to step 3.
+
+The marker prints on failed fits too, so silence is never ambiguous.
+
+## 5. Uninstall
 
 ```matlab
-which spc_fitexp2gaussGY -all     % this folder must be line 1
-which spc_fitexp2prfGY   -all     % this folder must be line 1
+rmpath('/path/to/flim-shadow-release-1.0')
 ```
 
-Use `-all`. Plain `which` shows only the first hit and will look correct even
-when it isn't.
+That is the entire uninstall. Nothing to restore.
 
-Then **after any fit, look for a console line starting `>>> SHADOW`**:
-
-```
->>> SHADOW spc_fitexp2prfGY | Poisson-MLE/VARPRO | chan=1 | irf=session | pop1=0.6651 redchisq=10.6573 | src=/path/to/flim-shadow-release/spc_fitexp2prfGY.m <<<
-```
-
-**No marker means the lab fitter ran, not this one.** The line prints on failed
-fits too, so silence is never ambiguous. The lab functions print nothing like it.
-
-## Troubleshooting
+## 6. Troubleshooting
 
 If the shadow is not line 1:
 
 ```matlab
 restoredefaultpath
 % re-add the lab tree (zFLIM fit, utilities, display, calcs, guis), then:
-addpath('/path/to/flim-shadow-release', '-begin')   % last, and with -begin
+addpath('/path/to/flim-shadow-release-1.0', '-begin')   % last, and with -begin
 ```
 
 **A path with several copies of the zFLIM tree on it can silently win over the
@@ -65,8 +99,14 @@ shadow even when plain `which` looks correct.** There are commonly eight or more
 copies of these fit functions across a machine (the acquisition tree, the FLiP
 tree, publication archives). `which` reports only the first; a second copy
 sitting between the shadow and the point of use is invisible to it. This cost an
-hour to diagnose once — use `-all`, and use `restoredefaultpath` rather than
-adding more paths on top.
+hour to diagnose once — use `-all`.
+
+**If your lab code lives on a network share, `restoredefaultpath` removes those
+paths too**, not just the stray ones. Re-add the lab tree afterwards (or restart
+the FLIM GUI, if that is what normally sets your path up) before adding this
+folder with `-begin` last.
+
+---
 
 ## What changes vs. the lab fit
 
@@ -108,8 +148,3 @@ with its own stored lifetimes, run headless through the real lab dispatch:
 
 Ask Matt for the full analysis, the per-file CSVs, and the caveats — they matter
 more than the headline.
-
-## Requirements
-
-Base MATLAB only. No toolboxes. Verified with `requiredFilesAndProducts`: these
-three files plus six lab functions already on your path are the complete closure.
