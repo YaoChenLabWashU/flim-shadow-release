@@ -129,14 +129,6 @@ folder with `-begin` last.
   `avgTauTrunc`, `figOffset`, and every ROI lifetime. Re-fit any file whose
   `beta5` a shadow wrote.
 
-## What is NOT covered
-
-**Fit1 and both single-exponential menu items still run the lab's original
-code**, with nothing on screen indicating the difference. Only the two
-double-exponential fitters (`spc_fitexp2gaussGY`, `spc_fitexp2prfGY`) are
-shadowed. If you click Fit1 you get the lab's fit; the `>>> SHADOW` marker is how
-you tell.
-
 ## Evidence
 
 On a fair comparison against the lab's `spc_fitexp2prfGY` across 505 files, each
@@ -146,5 +138,3 @@ with its own stored lifetimes, run headless through the real lab dispatch:
 - **498/505** better by Poisson deviance
 - **73/73** on AKAR, by both metrics
 
-Ask Matt for the full analysis, the per-file CSVs, and the caveats — they matter
-more than the headline.
